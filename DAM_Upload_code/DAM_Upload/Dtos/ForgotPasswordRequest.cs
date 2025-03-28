@@ -1,4 +1,4 @@
-﻿namespace DAM_Upload.Models
+﻿namespace DAM_Upload.Dtos
 {
     public class ForgotPasswordRequest
     {

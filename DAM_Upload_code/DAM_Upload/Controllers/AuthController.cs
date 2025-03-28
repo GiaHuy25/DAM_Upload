@@ -55,11 +55,17 @@ namespace DAM_Upload.Controllers
             {
                 return Unauthorized("Invalid username or password.");
             }
-
+            HttpContext.Session.SetInt32("UserId", user.Id);
             return Ok(new { Message = "Login successful!", User = user });
         }
 
-      
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return Ok(new { Message = "Logout successful" });
+        }
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
