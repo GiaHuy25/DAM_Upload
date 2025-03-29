@@ -3,6 +3,7 @@ using DAM_Upload.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DAM_Upload.Controllers
@@ -25,15 +26,15 @@ namespace DAM_Upload.Controllers
         {
             try
             {
-                // Lấy UserId từ session
-                var userId = HttpContext.Session.GetInt32("UserId");
-                if (!userId.HasValue)
+                // Lấy UserId từ JWT
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
                 {
-                    return Unauthorized("User not logged in.");
+                    return Unauthorized("Invalid user.");
                 }
 
                 // Gọi service để lấy danh sách Folder và File
-                var (items, hasMore) = await _folderFileService.GetFolderAndFileAsync(userId.Value, folderId, skip);
+                var (items, hasMore) = await _folderFileService.GetFolderAndFileAsync(userId, folderId, skip);
                 return Ok(new
                 {
                     Items = items,
@@ -49,19 +50,19 @@ namespace DAM_Upload.Controllers
         }
 
         [HttpPost("search")]
-        public async Task<IActionResult> Search([FromBody] SearchCriteriaDTO criteria, int skip = 0)
+        public async Task<IActionResult> Search([FromBody] SearchCriteriaDTO criteria = null, int skip = 0)
         {
             try
             {
-                // Lấy UserId từ session
-                var userId = HttpContext.Session.GetInt32("UserId");
-                if (!userId.HasValue)
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
                 {
-                    return Unauthorized("User not logged in.");
+                    return Unauthorized("Invalid user.");
                 }
 
-                // Gọi service để tìm kiếm
-                var (items, hasMore) = await _searchService.SearchAsync(userId.Value, criteria, skip);
+                criteria ??= new SearchCriteriaDTO();
+
+                var (items, hasMore) = await _searchService.SearchAsync(userId, criteria, skip);
                 return Ok(new
                 {
                     Items = items,

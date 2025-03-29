@@ -11,5 +11,6 @@ namespace DAM_Upload.db
         public DbSet<DAM_Upload.Models.File> Files { get; set; }
         public DbSet<Folder> Folders { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<BlacklistedToken> BlacklistedTokens { get; set; }
     }
 }
